@@ -1,17 +1,17 @@
 package middleware
 
 import (
-    "context"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
-    "../models"
+	"../models"
 	"github.com/gorilla/mux"
 
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -37,7 +37,7 @@ func init() {
 	clientOptions := options.Client().ApplyURI(connectionString)
 
 	// connect to MongoDB
-	client, err = mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,8 +54,8 @@ func init() {
 }
 
 // GetAllTask get all the task route
-func GetAllTask(w http.ResopnseWriter, r *http.Request) {
-    w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+func GetAllTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	payload := getAllTask()
 	json.NewEncoder(w).Encode(payload)
@@ -76,7 +76,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 // TaskComplete update task route
 func TaskComplete(w http.ResponseWriter, r *http.Request) {
 
-    w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "PUT")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -86,10 +86,22 @@ func TaskComplete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(params["id"])
 }
 
+// UndoTask undo the complete task route
+func UndoTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "PUT")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	params := mux.Vars(r)
+	undoTask(params["id"])
+	json.NewEncoder(w).Encode(params["id"])
+}
+
 // DeleteTask delete one task route
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
-    w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "PUT")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -102,7 +114,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 // DeleteAllTask delete all tasks route
 func DeleteAllTask(w http.ResponseWriter, r *http.Request) {
 
-    w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	count := deleteAllTask()
@@ -121,7 +133,7 @@ func getAllTask() []primitive.M {
 		var result bson.M
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Fatal(e)
+			log.Fatal(err)
 		}
 		results = append(results, result)
 	}
@@ -135,7 +147,7 @@ func getAllTask() []primitive.M {
 }
 
 // Insert one task in the DB
-func insertOneTask(task models.ToDolist) {
+func insertOneTask(task models.ToDoList) {
 	insertResult, err := collection.InsertOne(context.Background(), task)
 	if err != nil {
 		log.Fatal(err)
@@ -191,6 +203,5 @@ func deleteAllTask() int64 {
 	}
 
 	fmt.Println("Deleted Document", d.DeletedCount)
-	return d.DeletedCound
+	return d.DeletedCount
 }
-
